@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hızlı Tıkla - Mini Oyun</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at top, #1b263b 0%, #0d1b2a 55%, #05070d 100%);
+        color: #f8f9fb;
+      }
+
+      .container {
+        width: min(920px, 92vw);
+        padding: 32px;
+        border-radius: 24px;
+        background: rgba(17, 25, 40, 0.85);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(6px);
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        width: min(360px, 100%);
+      }
+
+      .stat {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 12px 14px;
+        text-align: center;
+        font-weight: 600;
+      }
+
+      .stat span {
+        display: block;
+        font-size: 0.8rem;
+        opacity: 0.7;
+        font-weight: 500;
+      }
+
+      .board {
+        margin-top: 24px;
+        background: rgba(10, 12, 18, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        position: relative;
+        height: min(420px, 60vh);
+        overflow: hidden;
+      }
+
+      .target {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        background: radial-gradient(circle at 30% 30%, #ffd166 0%, #ff7a59 45%, #ef476f 100%);
+        box-shadow: 0 8px 20px rgba(239, 71, 111, 0.45);
+        display: grid;
+        place-items: center;
+        font-size: 1.6rem;
+        color: #1b1b1b;
+        transition: transform 0.08s ease;
+      }
+
+      .target:active {
+        transform: scale(0.92);
+      }
+
+      .controls {
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      button.primary {
+        background: #1b6ef3;
+        border: none;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 999px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button.primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .message {
+        font-size: 1rem;
+        opacity: 0.85;
+      }
+
+      .tips {
+        margin-top: 12px;
+        font-size: 0.9rem;
+        opacity: 0.65;
+      }
+
+      @media (max-width: 600px) {
+        .stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <div>
+          <h1>Hızlı Tıkla: Refleks Oyunu</h1>
+          <p class="message">30 saniyede mümkün olduğunca çok hedefe tıkla!</p>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <span>Skor</span>
+            <strong id="score">0</strong>
+          </div>
+          <div class="stat">
+            <span>Kalan Süre</span>
+            <strong id="time">30</strong>s
+          </div>
+          <div class="stat">
+            <span>En İyi</span>
+            <strong id="best">0</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="board" id="board" aria-live="polite"></section>
+
+      <div class="controls">
+        <button class="primary" id="startBtn">Oyunu Başlat</button>
+        <p class="message" id="status">Hazırsan başlat!</p>
+      </div>
+      <p class="tips">İpucu: Hedef rastgele yerlere sıçrar, yaklaşmak için gözünü hedefte tut.</p>
+    </main>
+
+    <script>
+      const board = document.getElementById("board");
+      const scoreEl = document.getElementById("score");
+      const timeEl = document.getElementById("time");
+      const bestEl = document.getElementById("best");
+      const statusEl = document.getElementById("status");
+      const startBtn = document.getElementById("startBtn");
+
+      let score = 0;
+      let timeLeft = 30;
+      let timer = null;
+      let target = null;
+
+      const bestScoreKey = "fast-click-best";
+      const savedBest = Number.parseInt(localStorage.getItem(bestScoreKey) || "0", 10);
+      bestEl.textContent = savedBest.toString();
+
+      const placeTarget = () => {
+        if (!target) return;
+        const padding = 20;
+        const maxX = board.clientWidth - target.offsetWidth - padding;
+        const maxY = board.clientHeight - target.offsetHeight - padding;
+        const randomX = Math.max(padding, Math.random() * maxX);
+        const randomY = Math.max(padding, Math.random() * maxY);
+        target.style.left = `${randomX}px`;
+        target.style.top = `${randomY}px`;
+      };
+
+      const updateStatus = (text) => {
+        statusEl.textContent = text;
+      };
+
+      const finishGame = () => {
+        clearInterval(timer);
+        timer = null;
+        startBtn.disabled = false;
+        board.innerHTML = "";
+        target = null;
+        updateStatus(`Oyun bitti! Skorun: ${score}`);
+        if (score > savedBest) {
+          localStorage.setItem(bestScoreKey, score.toString());
+          bestEl.textContent = score.toString();
+        }
+      };
+
+      const handleHit = () => {
+        score += 1;
+        scoreEl.textContent = score.toString();
+        placeTarget();
+      };
+
+      const startGame = () => {
+        if (timer) return;
+        score = 0;
+        timeLeft = 30;
+        scoreEl.textContent = "0";
+        timeEl.textContent = timeLeft.toString();
+        updateStatus("Hedefe tıklamaya başla!");
+        startBtn.disabled = true;
+
+        target = document.createElement("button");
+        target.className = "target";
+        target.type = "button";
+        target.setAttribute("aria-label", "Hedefe tıkla");
+        target.textContent = "⚡";
+        target.addEventListener("click", handleHit);
+
+        board.innerHTML = "";
+        board.appendChild(target);
+        placeTarget();
+
+        timer = setInterval(() => {
+          timeLeft -= 1;
+          timeEl.textContent = timeLeft.toString();
+          if (timeLeft <= 0) {
+            finishGame();
+          }
+        }, 1000);
+      };
+
+      startBtn.addEventListener("click", startGame);
+      window.addEventListener("resize", placeTarget);
+    </script>
+  </body>
+</html>

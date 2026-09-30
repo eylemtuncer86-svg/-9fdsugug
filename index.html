@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RÜZGARIN LEGOLARI</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="visitor-gate" id="visitorGate" aria-live="polite">
+      <form class="gate-card" id="visitorForm">
+        <p class="eyebrow">Hoş geldin</p>
+        <h1>RÜZGARIN LEGOLARI</h1>
+        <p>Siteye girenleri yönetici panelinde görebilmek için adını yazabilirsin.</p>
+        <label for="visitorName">Adın</label>
+        <input id="visitorName" name="visitorName" type="text" maxlength="40" placeholder="Örn. Ali" />
+        <button type="submit">Siteye Gir</button>
+        <button class="ghost" type="button" id="skipVisitor">Adsız Gir</button>
+      </form>
+    </div>
+
+    <header class="hero">
+      <nav>
+        <strong>RÜZGARIN LEGOLARI</strong>
+        <button id="adminOpen">Yönetici Girişi</button>
+      </nav>
+      <section>
+        <p class="eyebrow">Lego sergisi</p>
+        <h2>Rüzgar'ın en güzel Lego yapıları burada yayınlanır.</h2>
+        <p>Fotoğraf ve videoları yönetici panelinden ekleyebilir, ziyaretçilerin normal şekilde göreceği bir galeri oluşturabilirsin.</p>
+      </section>
+    </header>
+
+    <main>
+      <section class="intro">
+        <article>
+          <h3>Yeni Lego Projeleri</h3>
+          <p>Arabalar, şehirler, uzay gemileri ve hayal gücüyle yapılmış tüm Lego eserleri için özel bir alan.</p>
+        </article>
+        <article>
+          <h3>Fotoğraf & Video</h3>
+          <p>Yönetici girişiyle medya yükle; ziyaretçiler galeride normal site görünümünde izlesin.</p>
+        </article>
+        <article>
+          <h3>Ziyaretçi Listesi</h3>
+          <p>Siteye giriş yapan kişilerin adı ve giriş zamanı yönetici panelinde listelenir.</p>
+        </article>
+      </section>
+
+      <section class="gallery-section">
+        <div class="section-title">
+          <p class="eyebrow">Galeri</p>
+          <h2>Yayınlanan Legolar</h2>
+        </div>
+        <div class="gallery" id="gallery"></div>
+        <p class="empty" id="emptyGallery">Henüz yüklenmiş Lego fotoğrafı veya videosu yok.</p>
+      </section>
+    </main>
+
+    <dialog id="adminDialog" class="admin-dialog">
+      <form class="admin-login" id="adminLogin">
+        <button type="button" class="close" id="adminClose" aria-label="Kapat">×</button>
+        <p class="eyebrow">Gizli alan</p>
+        <h2>Yönetici Girişi</h2>
+        <label for="password">Şifre</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Şifreyi yaz" />
+        <button type="submit">Giriş Yap</button>
+        <p class="error" id="loginError" role="alert"></p>
+      </form>
+
+      <section class="admin-panel" id="adminPanel" hidden>
+        <button type="button" class="close" id="panelClose" aria-label="Kapat">×</button>
+        <p class="eyebrow">Yönetim paneli</p>
+        <h2>Fotoğraf / Video Yükle</h2>
+        <form id="uploadForm" class="upload-form">
+          <label for="legoTitle">Başlık</label>
+          <input id="legoTitle" type="text" maxlength="60" placeholder="Örn. Lego uzay gemim" required />
+          <label for="legoFile">Fotoğraf veya video</label>
+          <input id="legoFile" type="file" accept="image/*,video/*" required />
+          <button type="submit">Galeride Yayınla</button>
+        </form>
+
+        <div class="admin-grid">
+          <section>
+            <h3>Yüklenenler</h3>
+            <div id="adminMediaList" class="admin-list"></div>
+          </section>
+          <section>
+            <h3>Siteye Girenler</h3>
+            <div id="visitorList" class="admin-list"></div>
+            <button type="button" class="danger" id="clearVisitors">Ziyaretçi Listesini Temizle</button>
+          </section>
+        </div>
+      </section>
+    </dialog>
+
+    <footer>
+      <p>© RÜZGARIN LEGOLARI — Lego eserlerini güvenle sergile.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
